@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+db.sqlite3
+media/
+staticfiles/
+.env
+*.log
+.DS_Store
+portfolio_export.xlsx

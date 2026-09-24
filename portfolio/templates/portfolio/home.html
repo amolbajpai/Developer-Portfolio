@@ -1,0 +1,259 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if profile %}{{ profile.full_name }} — {{ profile.professional_title }}{% else %}Developer Portfolio{% endif %}</title>
+    <meta name="description" content="{% if profile %}{{ profile.summary|truncatechars:160 }}{% else %}Developer portfolio{% endif %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'portfolio/css/style.css' %}">
+</head>
+<body>
+    {% csrf_token %}
+    <header class="site-header">
+        <a class="logo" href="#top">{% if profile %}{{ profile.full_name }}{% else %}Portfolio{% endif %}</a>
+        <nav class="nav">
+            <a href="#about">About</a>
+            <a href="#skills">Skills</a>
+            <a href="#experience">Experience</a>
+            {% if projects %}<a href="#projects">Projects</a>{% endif %}
+            <a href="#education">Education</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <main id="top">
+        <section class="hero">
+            <div class="hero-copy">
+                {% if profile.eyebrow_text %}<p class="eyebrow">{{ profile.eyebrow_text }}</p>{% endif %}
+                <h1>{% if profile %}{{ profile.full_name }}{% else %}Developer Portfolio{% endif %}</h1>
+                <p class="role">{% if profile %}{{ profile.professional_title }} · {{ profile.years_of_experience }} years{% endif %}</p>
+                <p class="lede">{% if profile %}{{ profile.summary }}{% endif %}</p>
+                <div class="hero-actions">
+                    <a class="btn primary" href="#contact">Get in touch</a>
+                    {% if profile and profile.resume_file %}
+                    <a class="btn ghost" href="{{ profile.resume_file.url }}" target="_blank" rel="noopener">Download resume</a>
+                    {% endif %}
+                    {% if profile.linkedin_url %}
+                    <a class="social-btn linkedin" href="{{ profile.linkedin_url }}" target="_blank" rel="noopener" aria-label="LinkedIn" title="LinkedIn">{% include "portfolio/partials/icon_linkedin.html" %}</a>
+                    {% endif %}
+                    {% if profile.github_url %}
+                    <a class="social-btn github" href="{{ profile.github_url }}" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">{% include "portfolio/partials/icon_github.html" %}</a>
+                    {% endif %}
+                </div>
+                {% if profile %}
+                <ul class="meta-list">
+                    <li class="meta-item">
+                        <svg class="meta-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+                        <span>{{ profile.location_display }}</span>
+                    </li>
+                    <li>
+                        <a class="meta-item" href="tel:{{ profile.phone }}">
+                            <svg class="meta-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 7a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.6 1 1 0 0 1-.25 1z"/></svg>
+                            <span>{{ profile.phone }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="meta-item" href="mailto:{{ profile.email }}">
+                            <svg class="meta-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5L4 8V6l8 5 8-5z"/></svg>
+                            <span>{{ profile.email }}</span>
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+            <div class="hero-card">
+                {% if profile and profile.photo %}
+                <img class="avatar" src="{{ profile.photo.url }}" alt="Portrait of {{ profile.full_name }}">
+                {% else %}
+                <div class="avatar placeholder" aria-hidden="true">AB</div>
+                {% endif %}
+                {% if profile.focus_label or profile.focus_text %}
+                {% if profile.focus_label %}<p class="card-label">{{ profile.focus_label }}</p>{% endif %}
+                {% if profile.focus_text %}<p class="card-value">{{ profile.focus_text }}</p>{% endif %}
+                {% endif %}
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <h2>About</h2>
+            <p class="section-lead">
+                {% if profile %}{{ profile.summary }}{% else %}Profile details will appear after resume data is seeded.{% endif %}
+            </p>
+        </section>
+
+        <section id="skills" class="section">
+            <h2>Skills</h2>
+            {% if skills_by_category %}
+                {% for label, group in skills_by_category %}
+                <div class="skill-group">
+                    <h3>{{ label }}</h3>
+                    <ul class="chip-list">
+                        {% for skill in group %}
+                        <li>{{ skill.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No skills published yet.</p>
+            {% endif %}
+        </section>
+
+        <section id="experience" class="section">
+            <h2>Experience</h2>
+            {% if experiences %}
+            <ol class="timeline">
+                {% for job in experiences %}
+                <li>
+                    <div class="job-head">
+                        <h3>{{ job.job_title }}</h3>
+                        <p class="company">{{ job.company }}</p>
+                        <p class="muted">{{ job.date_range }}{% if job.location_display %} · {{ job.location_display }}{% endif %}</p>
+                    </div>
+                    <ul class="bullets">
+                        {% for bullet in job.bullets.all %}
+                        <li>{{ bullet.text }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endfor %}
+            </ol>
+            {% else %}
+                <p>No experience published yet.</p>
+            {% endif %}
+        </section>
+
+        {% if projects %}
+        <section id="projects" class="section">
+            <h2>Projects</h2>
+            <div class="project-grid">
+                {% for project in projects %}
+                <article class="project-card">
+                    {% if project.image %}
+                    <img src="{{ project.image.url }}" alt="">
+                    {% endif %}
+                    <h3>{{ project.title }}</h3>
+                    <p>{{ project.short_description|default:project.description }}</p>
+                    {% if project.tech_list %}
+                    <ul class="chip-list small">
+                        {% for tech in project.tech_list %}
+                        <li>{{ tech }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="project-links">
+                        {% if project.live_url %}<a href="{{ project.live_url }}" target="_blank" rel="noopener">Live</a>{% endif %}
+                        {% if project.github_url %}<a href="{{ project.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section id="education" class="section split">
+            <div>
+                <h2>Education</h2>
+                {% if education_list %}
+                <ul class="plain-list">
+                    {% for item in education_list %}
+                    <li>
+                        <h3>{{ item.degree }}{% if item.field_of_study %} · {{ item.field_of_study }}{% endif %}</h3>
+                        {% if item.institution %}<p>{{ item.institution }}</p>{% endif %}
+                        {% if item.description %}<p class="muted">{{ item.description }}</p>{% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No education records yet.</p>
+                {% endif %}
+            </div>
+            <div>
+                <h2>Certifications</h2>
+                {% if certifications %}
+                <ul class="plain-list">
+                    {% for item in certifications %}
+                    <li>
+                        <h3>{{ item.title }}</h3>
+                        <p class="muted">{% if item.issuer %}{{ item.issuer }}{% endif %}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No certifications yet.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section id="contact" class="section">
+            <h2>Contact</h2>
+            <p class="section-lead">Send a message and I will get back to you. We email a code to confirm the address is yours.</p>
+            {% if contact_success %}
+            <p class="flash success" role="status">Thanks. Your email is verified and your message has been sent.</p>
+            {% endif %}
+            {% if contact_error %}
+            <p class="flash error" role="alert">Please correct the errors below.</p>
+            {% endif %}
+            {% if contact_email_error %}
+            <p class="flash error" role="alert">{{ contact_email_error }}</p>
+            {% endif %}
+            {% if otp_error %}
+            <p class="flash error" role="alert">{{ otp_error }}</p>
+            {% endif %}
+            {% if pending_contact %}
+            <form class="contact-form" method="post" action="{% url 'contact_verify' %}">
+                {% csrf_token %}
+                <p>We sent a 6-digit code to <strong>{{ pending_email_masked }}</strong>. Enter it to prove this inbox is yours. The owner is notified only after this step.</p>
+                <label>Verification code {{ otp_form.code }} {{ otp_form.code.errors }}</label>
+                <button class="btn primary" type="submit">Verify email</button>
+            </form>
+            <form class="contact-form resend-form" method="post" action="{% url 'contact_resend' %}">
+                {% csrf_token %}
+                <button class="btn ghost" type="submit">Resend code</button>
+            </form>
+            {% else %}
+            <form class="contact-form" method="post" action="{% url 'contact' %}">
+                {% csrf_token %}
+                <label>Name {{ contact_form.name }} {{ contact_form.name.errors }}</label>
+                <label>Email {{ contact_form.email }} {{ contact_form.email.errors }}</label>
+                <label>Subject {{ contact_form.subject }} {{ contact_form.subject.errors }}</label>
+                <label>Message {{ contact_form.message }} {{ contact_form.message.errors }}</label>
+                <button class="btn primary" type="submit">Send message</button>
+            </form>
+            {% endif %}
+        </section>
+    </main>
+
+    <aside class="chat-widget" id="chat-widget">
+        <button class="chat-toggle" id="chat-toggle" type="button" aria-expanded="false">AI Assist</button>
+        <div class="chat-panel" id="chat-panel" hidden>
+            <button class="chat-close" id="chat-close" type="button" aria-label="Close Amol's AI Assist">&times;</button>
+            <header>
+                <div>
+                    <h2>Amol's AI Assist</h2>
+                    <p>Ask about Amol's profile.</p>
+                </div>
+                <button type="button" id="new-conversation">New conversation</button>
+            </header>
+            <div class="chat-log" id="chat-log" aria-live="polite"></div>
+            {% if not chat_configured %}
+            <p class="chat-banner">The chat service is not configured.</p>
+            {% endif %}
+            <form id="chat-form">
+                <label class="sr-only" for="chat-input">Message</label>
+                <input id="chat-input" name="message" autocomplete="off" placeholder="Ask about my experience…">
+                <button class="btn primary" type="submit">Send</button>
+            </form>
+        </div>
+    </aside>
+
+    <footer class="site-footer">
+        <p>{% if profile %}© {{ profile.full_name }}{% else %}Developer Portfolio{% endif %}</p>
+    </footer>
+    <script src="{% static 'portfolio/js/chat.js' %}"></script>
+</body>
+</html>
